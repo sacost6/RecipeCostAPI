@@ -47,7 +47,7 @@ public class IngredientsController : ControllerBase
         {
             Name = ingredientDto.Name,
             CostPerUnit = ingredientDto.CostPerBaseUnit,
-            BaseUnit = RecipeCostAPI.Models.UnitType.Gram, // Defaulting for now
+            BaseUnit = (RecipeCostAPI.Models.UnitType)ingredientDto.BaseUnit,
             CostPerBaseUnit = ingredientDto.CostPerBaseUnit
         };
 
@@ -62,10 +62,46 @@ public class IngredientsController : ControllerBase
         {
             Id = ingredient.Id,
             Name = ingredient.Name,
-            BaseUnit = ingredient.BaseUnit.ToString(),
+            BaseUnit = (RecipeCost.Shared.UnitType)ingredientDto.BaseUnit,
             CostPerBaseUnit = ingredient.CostPerBaseUnit
         };
 
         return CreatedAtAction(nameof(GetIngredient), new { id = ingredient.Id }, resultDto);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteIngredient(int id)
+    {
+        // Look for ingredient in the database
+        var ingredient = await _context.Ingredients.FindAsync(id);
+        
+        // If not found, return 404
+        if (ingredient == null) return NotFound();
+
+        // If found, delete it
+        _context.Ingredients.Remove(ingredient);
+
+        // Save changes to the database
+        await _context.SaveChangesAsync();
+
+        // Return 204 No Content to indicate successful deletion
+        return NoContent();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateIngredient(int id, IngredientDto dto)
+    {
+        if (id != dto.Id) return BadRequest();
+
+        var ingredient = await _context.Ingredients.FindAsync(id);
+        if (ingredient == null) return NotFound();
+
+        // Map DTO back to Entity
+        ingredient.Name = dto.Name;
+        ingredient.CostPerBaseUnit = dto.CostPerBaseUnit;
+        ingredient.BaseUnit = (RecipeCostAPI.Models.UnitType)dto.BaseUnit;
+
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 }

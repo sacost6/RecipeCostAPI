@@ -9,11 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // 1. Handle potential reference loops
+        // Handle potential reference loops
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
-        // 2. Convert Enums (0, 1, 2) into Strings ("Gram", "Piece")
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Tells the API to send "Gram" instead of 0
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
+        // 
     });
 
 // Register DIs for services
