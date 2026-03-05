@@ -4,6 +4,7 @@ services:
   # 1. The Database (PostgreSQL)
   postgresdata:
     image: postgres:16-alpine
+    container_name: postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=YourStrong!Passw0rd123

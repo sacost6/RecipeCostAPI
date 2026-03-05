@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RecipeCostAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +8,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Add DbContext using Npgql
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql.Value(connectionString)); 
+    options.UseNpgsql(connectionString));
 
 // Services Area 
 // Define a string variable for the name of our policy
