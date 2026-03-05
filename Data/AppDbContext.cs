@@ -28,6 +28,6 @@ public class AppDbContext : DbContext {
         // 2. Optional: Configure Precision for Currency
         modelBuilder.Entity<Ingredient>()
             .Property(i => i.CostPerBaseUnit)
-            .HasPrecision(18, 2); // Adjust as needed for your currency
+            .HasPrecision(18, 4); // Adjust as needed for your currency
     }
     }
