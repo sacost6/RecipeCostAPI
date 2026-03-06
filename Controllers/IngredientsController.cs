@@ -4,6 +4,7 @@ using RecipeCostAPI.Data;
 using RecipeCostAPI.Mappers;
 using RecipeCostAPI.Models;
 using RecipeCost.Shared;
+using RecipeCostAPI.Services.Interfaces;
 
 namespace RecipeCostAPI.Controllers;
 
@@ -11,81 +12,37 @@ namespace RecipeCostAPI.Controllers;
 [Route("api/[controller]")]
 public class IngredientsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IIngredientService _ingredientService; 
 
-    public IngredientsController(AppDbContext context)
+    public IngredientsController(IIngredientService ingredientService)
     {
-        _context = context;
+        _ingredientService = ingredientService;
     }
 
     // GET: api/ingredients
     [HttpGet]
     public async Task<ActionResult<IEnumerable<IngredientDto>>> GetIngredients()
     {
-        var ingredients = await _context.Ingredients.ToListAsync();
+        var ingredients = await _ingredientService.GetIngredientsAsync();
+        return Ok(ingredients);
 
-        // Use your Mapper to convert Entities to DTOs
-        return Ok(ingredients.Select(i => i.ToDto()));
     }
 
     // GET: api/ingredients/1
     [HttpGet("{id}")]
     public async Task<ActionResult<IngredientDto>> GetIngredient(int id)
     {
-        var ingredient = await _context.Ingredients.FindAsync(id);
-
+        var ingredient = await _ingredientService.GetIngredientByIdAsync(id);
         if (ingredient == null) return NotFound();
 
-        return Ok(ingredient.ToDto());
+        return Ok(ingredient);
     }
 
     [HttpPost]
     public async Task<ActionResult<IngredientDto>> CreateIngredient(IngredientDto ingredientDto)
     {
-        // 1. Convert the "Translator" (DTO) into a "Database Object" (Entity)
-        var ingredient = new Ingredient
-        {
-            Name = ingredientDto.Name,
-            CostPerUnit = ingredientDto.CostPerBaseUnit,
-            BaseUnit = (RecipeCostAPI.Models.UnitType)ingredientDto.BaseUnit,
-            CostPerBaseUnit = ingredientDto.CostPerBaseUnit
-        };
-
-        // 2. Tell the database to track this new item
-        _context.Ingredients.Add(ingredient);
-
-        // 3. Save the changes to PostgreSQL
-        await _context.SaveChangesAsync();
-
-        // 4. Send back a new DTO with the ID the database just created
-        var resultDto = new IngredientDto
-        {
-            Id = ingredient.Id,
-            Name = ingredient.Name,
-            BaseUnit = (RecipeCost.Shared.UnitType)ingredientDto.BaseUnit,
-            CostPerBaseUnit = ingredient.CostPerBaseUnit
-        };
-
-        return CreatedAtAction(nameof(GetIngredient), new { id = ingredient.Id }, resultDto);
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteIngredient(int id)
-    {
-        // Look for ingredient in the database
-        var ingredient = await _context.Ingredients.FindAsync(id);
-        
-        // If not found, return 404
-        if (ingredient == null) return NotFound();
-
-        // If found, delete it
-        _context.Ingredients.Remove(ingredient);
-
-        // Save changes to the database
-        await _context.SaveChangesAsync();
-
-        // Return 204 No Content to indicate successful deletion
-        return NoContent();
+        var created = await _ingredientService.CreateIngredientAsync(ingredientDto);
+        return CreatedAtAction(nameof(GetIngredient), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
@@ -93,15 +50,19 @@ public class IngredientsController : ControllerBase
     {
         if (id != dto.Id) return BadRequest();
 
-        var ingredient = await _context.Ingredients.FindAsync(id);
-        if (ingredient == null) return NotFound();
+        var success = await _ingredientService.UpdateIngredientAsync(id, dto);
+        if (!success) return NotFound();
 
-        // Map DTO back to Entity
-        ingredient.Name = dto.Name;
-        ingredient.CostPerBaseUnit = dto.CostPerBaseUnit;
-        ingredient.BaseUnit = (RecipeCostAPI.Models.UnitType)dto.BaseUnit;
-
-        await _context.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteIngredient(int id)
+    {
+        var success = await _ingredientService.DeleteIngredientAsync(id);
+        if (!success) return NotFound();
+
+        return NoContent();
+    }
+      
 }

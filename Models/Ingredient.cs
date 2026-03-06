@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using RecipeCost.Shared;
 namespace RecipeCostAPI.Models;
 // Data model for Ingredient
 public class Ingredient
@@ -10,9 +10,6 @@ public class Ingredient
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
-
-    [Range(0, double.MaxValue)]
-    public decimal CostPerUnit { get; set; }
 
     [Required]
     public UnitType BaseUnit { get; set; }

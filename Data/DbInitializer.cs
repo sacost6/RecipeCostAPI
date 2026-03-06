@@ -1,6 +1,6 @@
 using RecipeCostAPI.Models;
 using Microsoft.EntityFrameworkCore;
-
+using RecipeCost.Shared;
 namespace RecipeCostAPI.Data;
 
 public static class DbInitializer
@@ -48,9 +48,9 @@ public static class DbInitializer
                 Description = "A simple starter cake.",
                 RecipeIngredients = new List<RecipeIngredient>
                 {
-                    new() { Ingredient = flour, Amount = 250, Unit = UnitType.Gram },
-                    new() { Ingredient = sugar, Amount = 200, Unit = UnitType.Gram },
-                    new() { Ingredient = eggs, Amount = 4, Unit = UnitType.Piece }
+                    new() { Ingredient = flour, Quantity = 250, Unit = UnitType.Gram },
+                    new() { Ingredient = sugar, Quantity = 200, Unit = UnitType.Gram },
+                    new() { Ingredient = eggs, Quantity = 4, Unit = UnitType.Piece }
                 }
             };
 

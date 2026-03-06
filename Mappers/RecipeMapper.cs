@@ -1,59 +1,60 @@
-using RecipeCostAPI.Models;
-using RecipeCostAPI.DTOs;
-using RecipeCostAPI.Services; // Ensure this is here for IPricingService
-
+using RecipeCost.Shared; 
+using RecipeCostAPI.Models; 
+using RecipeCostAPI.Services.Interfaces; // Ensure this is here for IPricingService
 
 namespace RecipeCostAPI.Mappers;
 public static class RecipeMapper
 {
-    // 1. Map Ingredient -> IngredientDTO
+    // Map Ingredient -> IngredientDto
     public static IngredientDto ToDto(this Ingredient ingredient) =>
-        new(
-            ingredient.Id,
-            ingredient.Name,
-            ingredient.BaseUnit,
-            ingredient.CostPerBaseUnit
-            );
+        new IngredientDto
+        {
+            Id = ingredient.Id,
+            Name = ingredient.Name,
+            BaseUnit = ingredient.BaseUnit,
+            CostPerBaseUnit = ingredient.CostPerBaseUnit
+        };
 
-    // 2. Map RecipeIngredient -> RecipeIngredientDTO
+    // Map RecipeIngredient -> RecipeIngredientDto
     public static RecipeIngredientDto ToDto(this RecipeIngredient ri, IPricingService pricingService) =>
-    new(
-        ri.IngredientId,
-        ri.Ingredient?.Name ?? "Unknown",
-        ri.Amount,
-        ri.Unit,
-        pricingService.CalculateLineItemCost(ri.Amount, ri.Unit, ri.Ingredient!)
-    );
+        new RecipeIngredientDto
+        {
+            IngredientId = ri.IngredientId,
+            IngredientName = ri.Ingredient?.Name ?? "Unknown",
+            Quantity = (decimal)ri.Quantity, // Cast double to decimal for the DTO
+            BaseUnit = ri.Unit,
+            CalculatedCost = pricingService.CalculateLineItemCost(ri.Quantity, ri.Unit, ri.Ingredient!)
+        };
 
-    // 3. Map Recipe -> RecipeDto (The "Big" One)
+    // Map Recipe -> RecipeDto (The "Big" One)
     public static RecipeDto ToDto(this Recipe recipe, IPricingService pricingService)
     {
         var ingredientDtos = recipe.RecipeIngredients
             .Select(ri => ri.ToDto(pricingService))
             .ToList();
 
-        var totalCost = ingredientDtos.Sum(i => i.LineItemCost);
+        var totalCost = ingredientDtos.Sum(i => i.CalculatedCost);
 
-        return new RecipeDto(
-            recipe.Id,
-            recipe.Name,
-            recipe.Servings,
-            recipe.Description,
-            totalCost,
-            recipe.Servings > 0 ? totalCost / recipe.Servings : 0,
-            ingredientDtos
-        );
+        return new RecipeDto
+        {
+            Id = recipe.Id,
+            Name = recipe.Name,
+            Servings = recipe.Servings,
+            Description = recipe.Description != null ? recipe.Description : string.Empty,
+            TotalCost = totalCost,
+            CostPerServing = recipe.Servings > 0 ? totalCost / recipe.Servings : 0,
+            Ingredients = ingredientDtos
+        };
     }
 }
-
 
 public static class RecipeMappingExtensions
 {
     /// <summary>
-    /// Converts a CreateRecipeDto into a Recipe Entity.
+    /// Converts a CreateRecipeDto (or RecipeDto) into a Recipe Entity.
     /// Note: This does NOT fetch from the DB, it just prepares the object graph.
     /// </summary>
-    public static Recipe ToEntity(this CreateRecipeDto dto)
+    public static Recipe ToEntity(this RecipeDto dto)
     {
         return new Recipe
         {
@@ -64,8 +65,8 @@ public static class RecipeMappingExtensions
             RecipeIngredients = dto.Ingredients.Select(i => new RecipeIngredient
             {
                 IngredientId = i.IngredientId,
-                Amount = i.Amount,
-                Unit = i.Unit // Our Enum handles the type safety here
+                Quantity = i.Quantity, 
+                Unit = i.BaseUnit // Enum handles type safety here
             }).ToList()
         };
     }

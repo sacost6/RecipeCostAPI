@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using RecipeCost.Shared; 
 namespace RecipeCostAPI.Models;
 
 /// <summary>
@@ -24,9 +24,8 @@ public class RecipeIngredient
     [ForeignKey(nameof(IngredientId))]
     public virtual Ingredient Ingredient { get; set; } = null!;
 
-    [Required]
-    [Range(0.01, double.MaxValue)]
-    public double Amount { get; set; }
+    [Required]  
+    public decimal Quantity { get; set; }
 
     [Required] 
     public UnitType Unit { get; set; }

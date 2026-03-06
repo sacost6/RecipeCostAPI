@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RecipeCostAPI.Data;
 using RecipeCostAPI.Services;
+using RecipeCostAPI.Services.Interfaces;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddControllers()
 
 // Register DIs for services
 builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IIngredientService, IngredientService>();
 
 // Get connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -41,7 +44,7 @@ builder.Services.AddCors(options =>
                       {
                           policy.WithOrigins("http://localhost:3000",
                                              "http://localhost:5168",
-                                             "http://localhost:5168")
+                                             "https://localhost:5168")
                             
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();

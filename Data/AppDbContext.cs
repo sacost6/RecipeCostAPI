@@ -29,5 +29,21 @@ public class AppDbContext : DbContext {
         modelBuilder.Entity<Ingredient>()
             .Property(i => i.CostPerBaseUnit)
             .HasPrecision(18, 4); // Adjust as needed for your currency
+
+        // Configure precision for the Quantities in RecipeIngredient
+        modelBuilder.Entity<RecipeIngredient>()
+            .Property(ri => ri.Quantity)
+            .HasPrecision(18, 4); // Adjust as needed for your quantity precision
+
+        // Configure the Foreign Keys explicitly (optional but good practice)
+        modelBuilder.Entity<RecipeIngredient>()
+            .HasOne(ri => ri.Recipe)
+            .WithMany(r => r.RecipeIngredients)
+            .HasForeignKey(ri => ri.RecipeId);
+
+        modelBuilder.Entity<RecipeIngredient>()
+            .HasOne(ri => ri.Ingredient)
+            .WithMany(i => i.RecipeIngredients)
+            .HasForeignKey(ri => ri.IngredientId);
     }
-    }
+}
