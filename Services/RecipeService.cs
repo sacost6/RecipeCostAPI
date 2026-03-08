@@ -69,7 +69,12 @@ namespace RecipeCostAPI.Services
 
             recipe.Name = dto.Name;
             recipe.Description = dto.Description;
-
+            recipe.RecipeIngredients = dto.Ingredients.Select(i => new RecipeIngredient
+            {
+                IngredientId = i.IngredientId,
+                Quantity = i.Quantity
+            }).ToList();
+            recipe.Servings = dto.Servings;
             await _context.SaveChangesAsync();
             return true;
 
