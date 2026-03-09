@@ -4,16 +4,19 @@ using RecipeCostAPI.Data;
 using RecipeCostAPI.Mappers;
 using RecipeCostAPI.Models;
 using RecipeCostAPI.Services.Interfaces;
+using RecipeCostAPI.Services;
 
 namespace RecipeCostAPI.Services
 {
     public class IngredientService : IIngredientService
     {
         private readonly AppDbContext _context; 
+        private readonly IConverterService _converterService;
 
-        public IngredientService(AppDbContext context)
+        public IngredientService(AppDbContext context, IConverterService converterService)
         {
             _context = context;
+            _converterService = converterService;
         }
 
         public async Task<IEnumerable<IngredientDto>> GetIngredientsAsync()
@@ -32,11 +35,20 @@ namespace RecipeCostAPI.Services
         {
             var ingredient = new Ingredient
             {
-                Name = dto.Name, 
-                BaseUnit = dto.BaseUnit,
-                CostPerBaseUnit = dto.CostPerBaseUnit 
+                Name = dto.Name 
             };
 
+            // Convert unit to base unit if needed
+            if(dto.BaseUnit == UnitType.Gram || dto.BaseUnit == UnitType.Milliliter)
+            {
+                ingredient.BaseUnit = dto.BaseUnit;
+                ingredient.CostPerBaseUnit = dto.CostPerBaseUnit;
+            }
+            else
+            {
+                ingredient.BaseUnit = _converterService.GetBaseUnit(dto.BaseUnit);
+                ingredient.CostPerBaseUnit = _converterService.ConvertToBaseUnit(dto.CostPerBaseUnit, dto.BaseUnit);
+            }
             _context.Ingredients.Add(ingredient);
             await _context.SaveChangesAsync();
 
