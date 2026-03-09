@@ -26,4 +26,5 @@ public class Recipe
 
 	[NotMapped]
 	public decimal CostPerServing => Servings > 0 ? TotalCost / Servings : 0;
+ 
 }
