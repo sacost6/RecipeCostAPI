@@ -46,15 +46,18 @@ namespace RecipeCostAPI.Services
             {
                 var from = MapToVolume(fromUnit);
                 // We MUST use a VolumeUnit as the destination (toUnit)
-                var result = UnitConverter.Convert((double)quantity, from, VolumeUnit.Milliliter);
-                return (decimal)result;
+                var baseQuantity = UnitConverter.Convert((double)quantity, from, VolumeUnit.Milliliter);
+                // Calculate the base unit cost by dividing the user unit cost by the converted quantity in base units
+                var baseUnitCost = quantity / (decimal)baseQuantity;
+                return baseUnitCost;
             } 
             else if (IsMassUnit(fromUnit))
             {
                 var from = MapToMass(fromUnit);
                 // We MUST use a MassUnit as the destination (toUnit)
-                var result = UnitConverter.Convert((double)quantity, from, MassUnit.Gram);
-                return (decimal)result;
+                var baseQuantity = UnitConverter.Convert((double)quantity, from, MassUnit.Gram);
+                var baseUnitCost = quantity / (decimal)baseQuantity;
+                return baseUnitCost;
             }
             else if(IsPieceUnit(fromUnit))
             {

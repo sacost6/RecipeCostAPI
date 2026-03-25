@@ -17,6 +17,14 @@ public class Ingredient
     [Range(0, 999999)]
     public decimal CostPerBaseUnit { get; set; }
 
+    [Required] 
+    public UnitType UserUnit { get; set; }
+    
+    [Required]
+    public decimal CostPerUserUnit { get; set; }
+
+    public string Description { get; set; } = string.Empty;
+
     // Links back to any recipes using this ingredient
     public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
 }

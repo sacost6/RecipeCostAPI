@@ -1,6 +1,6 @@
 using RecipeCost.Shared; 
 using RecipeCostAPI.Models; 
-using RecipeCostAPI.Services.Interfaces; // Ensure this is here for IPricingService
+using RecipeCostAPI.Services.Interfaces;
 
 namespace RecipeCostAPI.Mappers;
 public static class RecipeMapper
@@ -12,7 +12,10 @@ public static class RecipeMapper
             Id = ingredient.Id,
             Name = ingredient.Name,
             BaseUnit = ingredient.BaseUnit,
-            CostPerBaseUnit = ingredient.CostPerBaseUnit
+            CostPerBaseUnit = ingredient.CostPerBaseUnit,
+            UserUnit = ingredient.UserUnit,
+            CostPerUserUnit = ingredient.CostPerUserUnit,
+            Description = ingredient.Description
         };
 
     // Map RecipeIngredient -> RecipeIngredientDto

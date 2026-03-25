@@ -35,19 +35,24 @@ namespace RecipeCostAPI.Services
         {
             var ingredient = new Ingredient
             {
-                Name = dto.Name 
+                Name = dto.Name,
+                Description = dto.Description,
+                UserUnit = dto.UserUnit,
+                CostPerUserUnit = dto.CostPerUserUnit
             };
 
             // Convert unit to base unit if needed
-            if(dto.BaseUnit == UnitType.Gram || dto.BaseUnit == UnitType.Milliliter)
+            if(dto.UserUnit == UnitType.Gram || dto.UserUnit == UnitType.Milliliter)
             {
-                ingredient.BaseUnit = dto.BaseUnit;
-                ingredient.CostPerBaseUnit = dto.CostPerBaseUnit;
+                ingredient.BaseUnit = dto.UserUnit;
+                ingredient.CostPerBaseUnit = dto.CostPerUserUnit;
             }
             else
             {
-                ingredient.BaseUnit = _converterService.GetBaseUnit(dto.BaseUnit);
-                ingredient.CostPerBaseUnit = _converterService.ConvertToBaseUnit(dto.CostPerBaseUnit, dto.BaseUnit);
+                // Get the base unit
+                ingredient.BaseUnit = _converterService.GetBaseUnit(dto.UserUnit);
+                // Given the user unit, base unit and userunit cost, calculate the base unit cost
+                ingredient.CostPerBaseUnit = _converterService.ConvertToBaseUnit(dto.CostPerUserUnit, dto.UserUnit);
             }
             _context.Ingredients.Add(ingredient);
             await _context.SaveChangesAsync();

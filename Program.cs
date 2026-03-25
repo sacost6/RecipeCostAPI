@@ -20,10 +20,11 @@ builder.Services.AddControllers()
     });
 
 // Register DIs for services
+builder.Services.AddScoped<IConverterService, ConverterService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IIngredientService, IngredientService>();
-builder.Services.AddScoped<IConverterService, ConverterService>();
+
 // Get connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

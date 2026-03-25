@@ -6,9 +6,9 @@ namespace RecipeCostAPI.Services;
 public class PricingService : IPricingService
 { 
 
-    private readonly ConverterService _converterService;
+    private readonly IConverterService _converterService;
 
-    public PricingService(ConverterService converterService)
+    public PricingService(IConverterService converterService)
     {
         _converterService = converterService;
     }
