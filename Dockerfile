@@ -4,14 +4,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Because they are in the same folder, just copy it directly
-COPY ["RecipeCostAPI.csproj", "./"]
-RUN dotnet restore "RecipeCostAPI.csproj"
+# Copy project files first so restore can be cached
+COPY ["RecipeCostAPI/RecipeCostAPI.csproj", "RecipeCostAPI/"]
+COPY ["RecipeCost.Shared/RecipeCost.Shared.csproj", "RecipeCost.Shared/"]
+RUN dotnet restore "RecipeCostAPI/RecipeCostAPI.csproj"
 
 COPY . .
 
 # Build and publish the application
-WORKDIR "/src"
+WORKDIR "/src/RecipeCostAPI"
 RUN dotnet publish "RecipeCostAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # ==========================================

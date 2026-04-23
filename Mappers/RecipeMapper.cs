@@ -5,19 +5,7 @@ using RecipeCostAPI.Services.Interfaces;
 namespace RecipeCostAPI.Mappers;
 public static class RecipeMapper
 {
-    // Map Ingredient -> IngredientDto
-    public static IngredientDto ToDto(this Ingredient ingredient) =>
-        new IngredientDto
-        {
-            Id = ingredient.Id,
-            Name = ingredient.Name,
-            BaseUnit = ingredient.BaseUnit,
-            CostPerBaseUnit = ingredient.CostPerBaseUnit,
-            UserUnit = ingredient.UserUnit,
-            CostPerUserUnit = ingredient.CostPerUserUnit,
-            Description = ingredient.Description
-        };
-
+     
     // Map RecipeIngredient -> RecipeIngredientDto
     public static RecipeIngredientDto ToDto(this RecipeIngredient ri, IPricingService pricingService) =>
         new RecipeIngredientDto

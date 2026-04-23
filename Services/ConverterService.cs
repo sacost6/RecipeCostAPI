@@ -7,7 +7,7 @@ namespace RecipeCostAPI.Services
 {
     public class ConverterService : IConverterService
     { 
-        public decimal Convert(decimal quantity, UnitType fromUnit, UnitType toUnit)
+        public decimal Convert(decimal quantity, UnitType fromUnit, UnitType toUnit, decimal? densityGramsPerMl = null)
         {
             if (quantity == 0) return 0;
             if (fromUnit == toUnit) return quantity;
@@ -28,6 +28,37 @@ namespace RecipeCostAPI.Services
                 return (decimal)UnitConverter.Convert(quantity, fromUnitsNet, toUnitsNet);
             }
 
+            // Handle Volume to Mass (Teaspoons to grams)
+            if(IsVolumeUnit(fromUnit) && IsMassUnit(toUnit))
+            {
+                if(!densityGramsPerMl.HasValue)
+                    throw new ArgumentException($"Density is required to convert from volume unit '{fromUnit}' to mass unit '{toUnit}'.");
+
+                var volume = Volume.From((double)quantity, MapToVolume(fromUnit));
+                var density = Density.FromGramsPerCubicCentimeter((double)densityGramsPerMl.Value); // 1 ml = 1 cm³
+
+                // Mass = Volume * Density
+                var massInKg = volume.CubicMeters * density.KilogramsPerCubicCentimeter; // Convert volume to mass using density
+                var mass = Mass.FromKilograms(massInKg);
+                return (decimal)mass.As(MapToMass(toUnit));
+            }
+
+            // Handle Mass to Volume (grams to teaspoons)
+            if(IsMassUnit(fromUnit) && IsVolumeUnit(toUnit))
+            {
+                if(!densityGramsPerMl.HasValue)
+                    throw new ArgumentException($"Density is required to convert from mass unit '{fromUnit}' to volume unit '{toUnit}'.");
+
+                var mass = Mass.From((double)quantity, MapToMass(fromUnit));
+                var density = Density.FromGramsPerCubicCentimeter((double)densityGramsPerMl.Value); // 1 ml = 1 cm³
+
+                // Volume = Mass / Density
+                var volumeInCubicMeters = mass.Kilograms / density.KilogramsPerCubicCentimeter; // Convert mass to volume using density
+                var volume = Volume.FromCubicMeters(volumeInCubicMeters);
+
+                return (decimal)volume.As(MapToVolume(toUnit)); 
+            }
+
             throw new ArgumentException($"Cannot convert from '{fromUnit}' to '{toUnit}'. Units must be of the same category (both mass or both volume).");
         }
 
@@ -39,7 +70,7 @@ namespace RecipeCostAPI.Services
         }
 
 
-        public decimal ConvertToBaseUnit(decimal quantity, UnitType fromUnit)
+        public decimal ConvertToBaseUnit(decimal quantity, UnitType fromUnit, decimal? densityGramsPerMl = null)
         {
             // Separate by category BEFORE calling the library
             if (IsVolumeUnit(fromUnit))

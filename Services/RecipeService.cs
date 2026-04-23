@@ -45,7 +45,8 @@ namespace RecipeCostAPI.Services
                 RecipeIngredients = recipeDto.Ingredients.Select(i => new RecipeIngredient
                 {
                     IngredientId = i.IngredientId,
-                    Quantity = i.Quantity
+                    Quantity = i.Quantity,
+                    Unit = i.BaseUnit   // Enum handles type safety here
                 }).ToList()
             };
 
@@ -72,8 +73,10 @@ namespace RecipeCostAPI.Services
             recipe.RecipeIngredients = dto.Ingredients.Select(i => new RecipeIngredient
             {
                 IngredientId = i.IngredientId,
-                Quantity = i.Quantity
+                Quantity = i.Quantity,
+                Unit = i.BaseUnit   // Enum handles type safety here
             }).ToList();
+            
             recipe.Servings = dto.Servings;
             await _context.SaveChangesAsync();
             return true;

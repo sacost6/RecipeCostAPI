@@ -20,7 +20,7 @@ public class PricingService : IPricingService
         try
         {
             // Convert the used unit to the ingredient's base unit
-            decimal convertedQuanity = _converterService.Convert(amount, usedUnit, ingredient.BaseUnit);
+            decimal convertedQuanity = _converterService.Convert(amount, usedUnit, ingredient.BaseUnit, ingredient.DensityGramsPerMl);
 
             // Final calculation: converted quantity multiplied by the cost per base unit
             return convertedQuanity * ingredient.CostPerBaseUnit;

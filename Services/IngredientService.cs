@@ -38,7 +38,9 @@ namespace RecipeCostAPI.Services
                 Name = dto.Name,
                 Description = dto.Description,
                 UserUnit = dto.UserUnit,
-                CostPerUserUnit = dto.CostPerUserUnit
+                CostPerUserUnit = dto.CostPerUserUnit,
+                // Map the density
+                DensityGramsPerMl = dto.DensityGramsPerMl
             };
 
             // Convert unit to base unit if needed
@@ -53,6 +55,10 @@ namespace RecipeCostAPI.Services
                 ingredient.BaseUnit = _converterService.GetBaseUnit(dto.UserUnit);
                 // Given the user unit, base unit and userunit cost, calculate the base unit cost
                 ingredient.CostPerBaseUnit = _converterService.ConvertToBaseUnit(dto.CostPerUserUnit, dto.UserUnit);
+
+                // Pass the density to the converter. 
+                // If the user set a price for a user unit of "cup", we need to know how many grams or milliliters are in that cup to convert to a base unit cost.
+                ingredient.CostPerBaseUnit = _converterService.ConvertToBaseUnit(dto.CostPerUserUnit, dto.UserUnit, dto.DensityGramsPerMl);
             }
             _context.Ingredients.Add(ingredient);
             await _context.SaveChangesAsync();

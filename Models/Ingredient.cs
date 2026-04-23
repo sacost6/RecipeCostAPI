@@ -25,6 +25,10 @@ public class Ingredient
 
     public string Description { get; set; } = string.Empty;
 
+    // Store density for unit conversions (e.g., grams per milliliter)
+    [Range(0, 999999)]
+    public decimal? DensityGramsPerMl { get; set; }
+
     // Links back to any recipes using this ingredient
     public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
 }
